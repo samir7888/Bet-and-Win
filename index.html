@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arbitrage Betting Calculator</title>
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #4f46e5;
+            --accent-color: #818cf8;
+            --background-color: #121212;
+            --card-bg-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --input-bg: #2d2d2d;
+            --border-color: #333;
+            --danger-color: #ef4444;
+            --success-color: #10b981;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            background-image: radial-gradient(circle at top right, #1e1e2e, #121212);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-bg-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            width: 100%;
+            max-width: 500px;
+            padding: 2rem;
+            border: 1px solid #333;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: all 0.3s;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+        }
+
+        input::placeholder {
+            color: #666;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .result-container {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            display: none;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            font-size: 1rem;
+            padding: 0.5rem 0;
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+            padding-top: 0.8rem;
+            border-top: 1px solid var(--border-color);
+            font-weight: 700;
+        }
+
+        .positive {
+            color: var(--success-color);
+        }
+
+        .negative {
+            color: var(--danger-color);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .footnote {
+            text-align: center;
+            font-size: 0.8rem;
+            margin-top: 1rem;
+            color: #888;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            input, .btn {
+                padding: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Arbitrage Betting Calculator</h1>
+        
+        <div class="form-group">
+            <label for="oddsA">Odds for Outcome A:</label>
+            <input type="number" id="oddsA" step="0.01" placeholder="e.g., 2.10">
+        </div>
+        
+        <div class="form-group">
+            <label for="oddsB">Odds for Outcome B:</label>
+            <input type="number" id="oddsB" step="0.01" placeholder="e.g., 1.95">
+        </div>
+        
+        <div class="form-group">
+            <label for="investment">Total Investment (NPR):</label>
+            <input type="number" id="investment" step="100" placeholder="e.g., 10000">
+        </div>
+        
+        <button class="btn" onclick="calculateArbitrage()">Calculate Arbitrage</button>
+        
+        <div class="result-container" id="resultContainer">
+            <div class="header">Investment Breakdown</div>
+            <div class="result-item">
+                <span>Stake on Outcome A:</span>
+                <span id="stakeA">NPR 0.00</span>
+            </div>
+            <div class="result-item">
+                <span>Stake on Outcome B:</span>
+                <span id="stakeB">NPR 0.00</span>
+            </div>
+            <div class="result-item">
+                <span>Guaranteed Profit:</span>
+                <span id="profit">NPR 0.00 (0.00%)</span>
+            </div>
+        </div>
+        
+        <p class="footnote">Find the best odds across different bookmakers to maximize your arbitrage opportunities.</p>
+    </div>
+
+    <script>
+        function calculateArbitrage() {
+            let oddsA = parseFloat(document.getElementById("oddsA").value);
+            let oddsB = parseFloat(document.getElementById("oddsB").value);
+            let investment = parseFloat(document.getElementById("investment").value);
+            let resultContainer = document.getElementById("resultContainer");
+            
+            // Validate inputs
+            if (!oddsA || !oddsB || !investment || oddsA <= 1 || oddsB <= 1 || investment <= 0) {
+                alert("Please enter valid odds (greater than 1) and investment amount.");
+                return;
+            }
+
+            // Calculate arbitrage
+            let sumInverseOdds = (1 / oddsA) + (1 / oddsB);
+            
+            // Display result container
+            resultContainer.style.display = "block";
+            
+            if (sumInverseOdds >= 1) {
+                // No arbitrage opportunity
+                document.getElementById("stakeA").textContent = "N/A";
+                document.getElementById("stakeB").textContent = "N/A";
+                document.getElementById("profit").textContent = "No arbitrage opportunity";
+                document.getElementById("profit").className = "negative";
+                return;
+            }
+
+            // Calculate stakes and profit
+            let stakeA = (investment * (1 / oddsA)) / sumInverseOdds;
+            let stakeB = investment - stakeA;
+            let profit = (stakeA * oddsA) - investment;
+            let profitPercentage = (profit / investment) * 100;
+
+            // Update UI with results
+            document.getElementById("stakeA").textContent = `NPR ${stakeA.toFixed(2)}`;
+            document.getElementById("stakeB").textContent = `NPR ${stakeB.toFixed(2)}`;
+            document.getElementById("profit").textContent = 
+                `NPR ${profit.toFixed(2)} (${profitPercentage.toFixed(2)}%)`;
+            document.getElementById("profit").className = profit > 0 ? "positive" : "negative";
+        }
+    </script>
+</body>
+</html>
