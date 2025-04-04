@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arbitrage Betting Calculator</title>
+    <title>Advanced Arbitrage Betting Calculator</title>
     <style>
         :root {
             --primary-color: #6366f1;
@@ -16,6 +16,7 @@
             --border-color: #333;
             --danger-color: #ef4444;
             --success-color: #10b981;
+            --highlight-color: #f59e0b;
             --border-radius: 8px;
             --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
@@ -45,22 +46,70 @@
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             width: 100%;
-            max-width: 500px;
+            max-width: 800px;
             padding: 2rem;
             border: 1px solid #333;
         }
 
         h1 {
             color: var(--primary-color);
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             font-size: 1.8rem;
             text-align: center;
             text-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
         }
 
+        .description {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
         .form-group {
             margin-bottom: 1.2rem;
-            text-align: left;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .checkbox-group input {
+            width: auto;
+            margin-right: 0.5rem;
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+        }
+
+        .input-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            padding: 12px;
+            border-radius: var(--border-radius);
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .bookmaker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .input-group {
+            display: flex;
+            flex: 1;
+            min-width: 200px;
         }
 
         label {
@@ -100,9 +149,30 @@
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            width: 100%;
             transition: all 0.3s;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-remove {
+            background-color: transparent;
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
         }
 
         .btn:hover {
@@ -111,8 +181,23 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
 
+        .btn-outline:hover {
+            background-color: rgba(79, 70, 229, 0.1);
+        }
+
+        .btn-remove:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger-color);
+        }
+
         .btn:active {
             transform: translateY(0);
+        }
+
+        .buttons-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
         .result-container {
@@ -124,12 +209,36 @@
             display: none;
         }
 
+        .bookmaker-results {
+            margin-top: 1rem;
+        }
+
+        .best-odds {
+            background-color: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: var(--border-radius);
+            padding: 0.3rem;
+        }
+
         .result-item {
             display: flex;
             justify-content: space-between;
             margin-bottom: 0.8rem;
             font-size: 1rem;
             padding: 0.5rem 0;
+        }
+
+        .bookmaker-card {
+            background-color: rgba(255, 255, 255, 0.02);
+            border-radius: var(--border-radius);
+            padding: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .bookmaker-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--accent-color);
         }
 
         .result-item:last-child {
@@ -139,12 +248,24 @@
             font-weight: 700;
         }
 
+        .result-summary {
+            background-color: rgba(16, 185, 129, 0.1);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
         .positive {
             color: var(--success-color);
         }
 
         .negative {
             color: var(--danger-color);
+        }
+
+        .highlight {
+            color: var(--highlight-color);
+            font-weight: bold;
         }
 
         .header {
@@ -161,101 +282,447 @@
             color: #888;
         }
 
-        @media (max-width: 600px) {
-            .container {
-                padding: 1.5rem;
-            }
+        .input-label {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
+            color: #aaa;
+        }
 
-            h1 {
-                font-size: 1.5rem;
-            }
+        .combinations-table {
+            width: 100%;
+            margin-top: 1rem;
+            border-collapse: collapse;
+        }
+        
+        .combinations-table th, .combinations-table td {
+            padding: 0.6rem;
+            border: 1px solid var(--border-color);
+            text-align: left;
+        }
+        
+        .combinations-table th {
+            background-color: rgba(255, 255, 255, 0.05);
+            font-weight: 600;
+        }
 
-            input, .btn {
-                padding: 0.7rem;
+        @media (max-width: 768px) {
+            .input-group {
+                width: 100%;
+            }
+            
+            .input-row {
+                flex-direction: column;
+                align-items: stretch;
+                padding-top: 2rem;
+            }
+            
+            .btn-remove {
+                top: 8px;
+                right: 8px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Arbitrage Betting Calculator</h1>
+        <h1>Advanced Arbitrage Calculator</h1>
+        <p class="description">Compare odds across multiple bookmakers to find the best arbitrage opportunities</p>
         
         <div class="form-group">
-            <label for="oddsA">Odds for Outcome A:</label>
-            <input type="number" id="oddsA" step="0.01" placeholder="e.g., 2.10">
-        </div>
-        
-        <div class="form-group">
-            <label for="oddsB">Odds for Outcome B:</label>
-            <input type="number" id="oddsB" step="0.01" placeholder="e.g., 1.95">
-        </div>
-        
-        <div class="form-group">
+            <div class="checkbox-group">
+                <input type="checkbox" id="includeDraw" onchange="toggleDrawOption()">
+                <label for="includeDraw">Include Draw Option</label>
+            </div>
+            
             <label for="investment">Total Investment (NPR):</label>
             <input type="number" id="investment" step="100" placeholder="e.g., 10000">
         </div>
         
-        <button class="btn" onclick="calculateArbitrage()">Calculate Arbitrage</button>
-        
-        <div class="result-container" id="resultContainer">
-            <div class="header">Investment Breakdown</div>
-            <div class="result-item">
-                <span>Stake on Outcome A:</span>
-                <span id="stakeA">NPR 0.00</span>
-            </div>
-            <div class="result-item">
-                <span>Stake on Outcome B:</span>
-                <span id="stakeB">NPR 0.00</span>
-            </div>
-            <div class="result-item">
-                <span>Guaranteed Profit:</span>
-                <span id="profit">NPR 0.00 (0.00%)</span>
+        <div id="bookmakers-container">
+            <!-- First bookmaker entry (always present) -->
+            <div class="input-row" id="bookmaker-1">
+                <div class="bookmaker-header">
+                    <input type="text" placeholder="Bookmaker name" class="bookmaker-name-input">
+                </div>
+                
+                <div class="input-group">
+                    <div style="flex: 1;">
+                        <span class="input-label">Outcome A Odds</span>
+                        <input type="number" class="odds-a" step="0.01" placeholder="e.g., 2.10">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <div style="flex: 1;">
+                        <span class="input-label">Outcome B Odds</span>
+                        <input type="number" class="odds-b" step="0.01" placeholder="e.g., 1.95">
+                    </div>
+                </div>
+                
+                <div class="input-group draw-input" style="display: none;">
+                    <div style="flex: 1;">
+                        <span class="input-label">Draw Odds</span>
+                        <input type="number" class="odds-draw" step="0.01" placeholder="e.g., 3.50">
+                    </div>
+                </div>
             </div>
         </div>
         
-        <p class="footnote">Find the best odds across different bookmakers to maximize your arbitrage opportunities.</p>
+        <div class="buttons-container">
+            <button class="btn btn-outline btn-sm" onclick="addBookmaker()">+ Add Another Bookmaker</button>
+        </div>
+        
+        <button class="btn" onclick="calculateArbitrage()">Calculate Best Arbitrage</button>
+        
+        <div class="result-container" id="resultContainer">
+            <div class="header">Arbitrage Analysis</div>
+            
+            <div id="arbitrageStatusMessage"></div>
+            
+            <div id="bookmakerResultsContainer" class="bookmaker-results"></div>
+            
+            <div id="allCombinationsContainer"></div>
+            
+            <div class="result-summary" id="resultSummary"></div>
+        </div>
+        
+        <p class="footnote">This calculator helps you find arbitrage opportunities across multiple bookmakers for the same event.</p>
     </div>
 
     <script>
+        let bookmakerCount = 1;
+        let drawEnabled = false;
+        
+        function toggleDrawOption() {
+            drawEnabled = document.getElementById('includeDraw').checked;
+            const drawInputs = document.querySelectorAll('.draw-input');
+            
+            drawInputs.forEach(input => {
+                input.style.display = drawEnabled ? 'block' : 'none';
+            });
+        }
+        
+        function addBookmaker() {
+            bookmakerCount++;
+            const bookmakerContainer = document.getElementById('bookmakers-container');
+            
+            const newBookmaker = document.createElement('div');
+            newBookmaker.className = 'input-row';
+            newBookmaker.id = `bookmaker-${bookmakerCount}`;
+            
+            newBookmaker.innerHTML = `
+                <button class="btn-remove" onclick="removeBookmaker(${bookmakerCount})">Remove</button>
+                <div class="bookmaker-header">
+                    <input type="text" placeholder="Bookmaker name" class="bookmaker-name-input">
+                </div>
+                
+                <div class="input-group">
+                    <div style="flex: 1;">
+                        <span class="input-label">Outcome A Odds</span>
+                        <input type="number" class="odds-a" step="0.01" placeholder="e.g., 2.10">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <div style="flex: 1;">
+                        <span class="input-label">Outcome B Odds</span>
+                        <input type="number" class="odds-b" step="0.01" placeholder="e.g., 1.95">
+                    </div>
+                </div>
+                
+                <div class="input-group draw-input" style="${drawEnabled ? 'block' : 'none'}">
+                    <div style="flex: 1;">
+                        <span class="input-label">Draw Odds</span>
+                        <input type="number" class="odds-draw" step="0.01" placeholder="e.g., 3.50">
+                    </div>
+                </div>
+            `;
+            
+            bookmakerContainer.appendChild(newBookmaker);
+        }
+        
+        function removeBookmaker(id) {
+            const bookmaker = document.getElementById(`bookmaker-${id}`);
+            bookmaker.remove();
+        }
+        
         function calculateArbitrage() {
-            let oddsA = parseFloat(document.getElementById("oddsA").value);
-            let oddsB = parseFloat(document.getElementById("oddsB").value);
-            let investment = parseFloat(document.getElementById("investment").value);
-            let resultContainer = document.getElementById("resultContainer");
+            const investment = parseFloat(document.getElementById('investment').value);
+            const resultContainer = document.getElementById('resultContainer');
+            const statusMessage = document.getElementById('arbitrageStatusMessage');
+            const bookmakerResultsContainer = document.getElementById('bookmakerResultsContainer');
+            const allCombinationsContainer = document.getElementById('allCombinationsContainer');
+            const resultSummary = document.getElementById('resultSummary');
             
-            // Validate inputs
-            if (!oddsA || !oddsB || !investment || oddsA <= 1 || oddsB <= 1 || investment <= 0) {
-                alert("Please enter valid odds (greater than 1) and investment amount.");
+            // Validate investment
+            if (!investment || investment <= 0) {
+                alert("Please enter a valid investment amount.");
                 return;
             }
-
-            // Calculate arbitrage
-            let sumInverseOdds = (1 / oddsA) + (1 / oddsB);
             
-            // Display result container
+            // Collect bookmaker data
+            const bookmakers = [];
+            const bookmakerElements = document.querySelectorAll('.input-row');
+            
+            bookmakerElements.forEach(element => {
+                const nameInput = element.querySelector('.bookmaker-name-input');
+                const oddsAInput = element.querySelector('.odds-a');
+                const oddsBInput = element.querySelector('.odds-b');
+                const oddsDrawInput = element.querySelector('.odds-draw');
+                
+                const name = nameInput.value || "Unnamed Bookmaker";
+                const oddsA = parseFloat(oddsAInput.value);
+                const oddsB = parseFloat(oddsBInput.value);
+                const oddsDraw = drawEnabled ? parseFloat(oddsDrawInput.value) : null;
+                
+                // Validate required odds
+                if (!oddsA || !oddsB || oddsA <= 1 || oddsB <= 1) {
+                    return; // Skip invalid entries
+                }
+                
+                // Validate draw odds if enabled
+                if (drawEnabled && (!oddsDraw || oddsDraw <= 1)) {
+                    return; // Skip if draw is enabled but invalid
+                }
+                
+                bookmakers.push({
+                    name,
+                    oddsA,
+                    oddsB,
+                    oddsDraw: drawEnabled ? oddsDraw : null
+                });
+            });
+            
+            if (bookmakers.length === 0) {
+                alert("Please enter valid odds for at least one bookmaker.");
+                return;
+            }
+            
+            // Display results container
             resultContainer.style.display = "block";
+            bookmakerResultsContainer.innerHTML = "";
+            allCombinationsContainer.innerHTML = "";
             
-            if (sumInverseOdds >= 1) {
-                // No arbitrage opportunity
-                document.getElementById("stakeA").textContent = "N/A";
-                document.getElementById("stakeB").textContent = "N/A";
-                document.getElementById("profit").textContent = "No arbitrage opportunity";
-                document.getElementById("profit").className = "negative";
-                return;
+            // Create bookmaker comparison display
+            bookmakers.forEach(bookmaker => {
+                const bookmakerCard = document.createElement('div');
+                bookmakerCard.className = 'bookmaker-card';
+                
+                bookmakerCard.innerHTML = `
+                    <div class="bookmaker-name">${bookmaker.name}</div>
+                    <div class="result-item">
+                        <span>Outcome A:</span>
+                        <span>${bookmaker.oddsA.toFixed(2)}</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Outcome B:</span>
+                        <span>${bookmaker.oddsB.toFixed(2)}</span>
+                    </div>
+                    ${drawEnabled ? `
+                    <div class="result-item">
+                        <span>Draw:</span>
+                        <span>${bookmaker.oddsDraw.toFixed(2)}</span>
+                    </div>
+                    ` : ''}
+                `;
+                
+                bookmakerResultsContainer.appendChild(bookmakerCard);
+            });
+            
+            // NEW LOGIC: Find all possible combinations across different bookmakers
+            const combinations = [];
+            let bestCombination = null;
+            let lowestTotalInverseOdds = Infinity;
+            
+            // For outcome A, we need to check every bookmaker
+            for (let i = 0; i < bookmakers.length; i++) {
+                const bookmakerA = bookmakers[i];
+                
+                // For outcome B, we check every other bookmaker
+                for (let j = 0; j < bookmakers.length; j++) {
+                    const bookmakerB = bookmakers[j];
+                    
+                    // If draw is enabled, we need to check every bookmaker for draw odds
+                    if (drawEnabled) {
+                        for (let k = 0; k < bookmakers.length; k++) {
+                            const bookmakerDraw = bookmakers[k];
+                            
+                            // Calculate total inverse odds for this combination
+                            const totalInverseOdds = (1 / bookmakerA.oddsA) + (1 / bookmakerB.oddsB) + (1 / bookmakerDraw.oddsDraw);
+                            
+                            const combination = {
+                                outcomeA: {
+                                    bookmaker: bookmakerA.name,
+                                    odds: bookmakerA.oddsA
+                                },
+                                outcomeB: {
+                                    bookmaker: bookmakerB.name,
+                                    odds: bookmakerB.oddsB
+                                },
+                                outcomeDraw: {
+                                    bookmaker: bookmakerDraw.name,
+                                    odds: bookmakerDraw.oddsDraw
+                                },
+                                totalInverseOdds: totalInverseOdds,
+                                impliedProbability: totalInverseOdds * 100,
+                                isArbitrage: totalInverseOdds < 1
+                            };
+                            
+                            combinations.push(combination);
+                            
+                            // Track the best combination (lowest total inverse odds)
+                            if (totalInverseOdds < lowestTotalInverseOdds) {
+                                lowestTotalInverseOdds = totalInverseOdds;
+                                bestCombination = combination;
+                            }
+                        }
+                    } else {
+                        // Without draw, just calculate for outcomes A and B
+                        const totalInverseOdds = (1 / bookmakerA.oddsA) + (1 / bookmakerB.oddsB);
+                        
+                        const combination = {
+                            outcomeA: {
+                                bookmaker: bookmakerA.name,
+                                odds: bookmakerA.oddsA
+                            },
+                            outcomeB: {
+                                bookmaker: bookmakerB.name,
+                                odds: bookmakerB.oddsB
+                            },
+                            totalInverseOdds: totalInverseOdds,
+                            impliedProbability: totalInverseOdds * 100,
+                            isArbitrage: totalInverseOdds < 1
+                        };
+                        
+                        combinations.push(combination);
+                        
+                        // Track the best combination (lowest total inverse odds)
+                        if (totalInverseOdds < lowestTotalInverseOdds) {
+                            lowestTotalInverseOdds = totalInverseOdds;
+                            bestCombination = combination;
+                        }
+                    }
+                }
             }
-
-            // Calculate stakes and profit
-            let stakeA = (investment * (1 / oddsA)) / sumInverseOdds;
-            let stakeB = investment - stakeA;
-            let profit = (stakeA * oddsA) - investment;
-            let profitPercentage = (profit / investment) * 100;
-
-            // Update UI with results
-            document.getElementById("stakeA").textContent = `NPR ${stakeA.toFixed(2)}`;
-            document.getElementById("stakeB").textContent = `NPR ${stakeB.toFixed(2)}`;
-            document.getElementById("profit").textContent = 
-                `NPR ${profit.toFixed(2)} (${profitPercentage.toFixed(2)}%)`;
-            document.getElementById("profit").className = profit > 0 ? "positive" : "negative";
+            
+            // Sort combinations by total inverse odds (ascending)
+            combinations.sort((a, b) => a.totalInverseOdds - b.totalInverseOdds);
+            
+            // Display the top 5 combinations
+            const topCombinations = combinations.slice(0, 5);
+            
+            // Create a table to display the top combinations
+            const combinationsTable = document.createElement('div');
+            combinationsTable.innerHTML = `
+                <div class="header" style="margin-top: 1.5rem;">Top Bookmaker Combinations</div>
+                <table class="combinations-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Outcome A</th>
+                            <th>Outcome B</th>
+                            ${drawEnabled ? '<th>Draw</th>' : ''}
+                            <th>Implied Probability</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${topCombinations.map((combo, index) => `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${combo.outcomeA.bookmaker} @ ${combo.outcomeA.odds.toFixed(2)}</td>
+                                <td>${combo.outcomeB.bookmaker} @ ${combo.outcomeB.odds.toFixed(2)}</td>
+                                ${drawEnabled ? `<td>${combo.outcomeDraw.bookmaker} @ ${combo.outcomeDraw.odds.toFixed(2)}</td>` : ''}
+                                <td>${combo.impliedProbability.toFixed(2)}%</td>
+                                <td class="${combo.isArbitrage ? 'positive' : 'negative'}">${combo.isArbitrage ? 'Arbitrage!' : 'No Arbitrage'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            allCombinationsContainer.appendChild(combinationsTable);
+            
+            // Display best result and calculate stakes if arbitrage exists
+            if (bestCombination && bestCombination.isArbitrage) {
+                const totalInverseOdds = bestCombination.totalInverseOdds;
+                const stakeA = (investment * (1 / bestCombination.outcomeA.odds)) / totalInverseOdds;
+                const stakeB = (investment * (1 / bestCombination.outcomeB.odds)) / totalInverseOdds;
+                const stakeDraw = drawEnabled ? (investment * (1 / bestCombination.outcomeDraw.odds)) / totalInverseOdds : 0;
+                
+                const profit = investment * ((1 / totalInverseOdds) - 1);
+                const profitPercentage = (profit / investment) * 100;
+                
+                statusMessage.innerHTML = `
+                    <div class="result-item positive">
+                        <span>Arbitrage Opportunity Found!</span>
+                        <span>Profit: NPR ${profit.toFixed(2)} (${profitPercentage.toFixed(2)}%)</span>
+                    </div>
+                `;
+                
+                resultSummary.innerHTML = `
+                    <div class="header">Best Arbitrage Strategy</div>
+                    <div class="result-item">
+                        <span>Stake on Outcome A:</span>
+                        <span>NPR ${stakeA.toFixed(2)} with ${bestCombination.outcomeA.bookmaker} @ ${bestCombination.outcomeA.odds.toFixed(2)}</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Stake on Outcome B:</span>
+                        <span>NPR ${stakeB.toFixed(2)} with ${bestCombination.outcomeB.bookmaker} @ ${bestCombination.outcomeB.odds.toFixed(2)}</span>
+                    </div>
+                    ${drawEnabled ? `
+                    <div class="result-item">
+                        <span>Stake on Draw:</span>
+                        <span>NPR ${stakeDraw.toFixed(2)} with ${bestCombination.outcomeDraw.bookmaker} @ ${bestCombination.outcomeDraw.odds.toFixed(2)}</span>
+                    </div>
+                    ` : ''}
+                    <div class="result-item">
+                        <span>Total Investment:</span>
+                        <span>NPR ${investment.toFixed(2)}</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Guaranteed Return:</span>
+                        <span class="positive">NPR ${(investment + profit).toFixed(2)}</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Guaranteed Profit:</span>
+                        <span class="positive">NPR ${profit.toFixed(2)} (${profitPercentage.toFixed(2)}%)</span>
+                    </div>
+                `;
+                
+            } else {
+                statusMessage.innerHTML = `
+                    <div class="result-item negative">
+                        <span>No Arbitrage Opportunity</span>
+                        <span>Best Implied Probability: ${(lowestTotalInverseOdds * 100).toFixed(2)}% (> 100%)</span>
+                    </div>
+                `;
+                
+                if (bestCombination) {
+                    resultSummary.innerHTML = `
+                        <div class="header">Best Combination (Not Arbitrage)</div>
+                        <div class="result-item">
+                            <span>Outcome A:</span>
+                            <span>${bestCombination.outcomeA.bookmaker} @ ${bestCombination.outcomeA.odds.toFixed(2)}</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Outcome B:</span>
+                            <span>${bestCombination.outcomeB.bookmaker} @ ${bestCombination.outcomeB.odds.toFixed(2)}</span>
+                        </div>
+                        ${drawEnabled ? `
+                        <div class="result-item">
+                            <span>Draw:</span>
+                            <span>${bestCombination.outcomeDraw.bookmaker} @ ${bestCombination.outcomeDraw.odds.toFixed(2)}</span>
+                        </div>
+                        ` : ''}
+                        <div class="result-item negative">
+                            <span>Implied Probability:</span>
+                            <span>${(bestCombination.impliedProbability).toFixed(2)}% (should be <100% for arbitrage)</span>
+                        </div>
+                    `;
+                }
+            }
         }
     </script>
 </body>
